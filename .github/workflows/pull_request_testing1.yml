@@ -1,0 +1,31 @@
+name: Test
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  test:
+    strategy:
+      fail-fast: true
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+        java: ['8', '11', '18']
+    runs-on: ${{ matrix.os }}
+    name: Running Java ${{ matrix.java }} on ${{ matrix.os }}
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK ${{ matrix.java }}
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+    - name: Test code
+      run: mvn -B -q test -D'logging.level.edu.hawaii.its.casdemo=OFF' -D'logging.level.org.springframework=ERROR' -D'spring.main.banner-mode=off'
+    - name: Test Maven
+      run: mvn test
+    - name: Test Jasmine
+      run: mvn jasmine:bdd
+    - name: Open jasmine website
+      run: xdg-open http://localhost:8234/
